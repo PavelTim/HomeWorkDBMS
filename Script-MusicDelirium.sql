@@ -39,7 +39,7 @@ CREATE TABLE IF NOT EXISTS track (
 CREATE TABLE IF NOT EXISTS performer_album (
     performer_id INTEGER REFERENCES performer(id),
     album_id INTEGER REFERENCES album(id),
-    CONSTRAINT pk PRIMARY KEY (performer_id, album_id)
+    CONSTRAINT pk_performer_album PRIMARY KEY (performer_id, album_id)
 );
 
 -- compilation
@@ -54,5 +54,8 @@ CREATE TABLE IF NOT EXISTS compilation (
 CREATE TABLE IF NOT EXISTS compilation_track (
     compilation_id INTEGER REFERENCES compilation(id),
     track_id INTEGER REFERENCES track(id),
-    CONSTRAINT pk PRIMARY KEY (compilation_id, track_id)
+    CONSTRAINT pk_compilation_track PRIMARY KEY (compilation_id, track_id)
 );
+
+-- переименовал первое ограничение
+ALTER TABLE performer_genre RENAME CONSTRAINT pk TO pk_performer_genre;
