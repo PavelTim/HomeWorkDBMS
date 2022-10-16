@@ -22,7 +22,7 @@ CREATE TABLE IF NOT EXISTS performer_genre (
 CREATE TABLE IF NOT EXISTS album (
     id SERIAL PRIMARY KEY,
     title VARCHAR(128) NOT NULL,
-    YEAR INTEGER,
+    year INTEGER,
     description text
 );
 
