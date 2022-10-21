@@ -1,4 +1,6 @@
 -- Домашнее задание по продвинутой выборке
+-- Работа над ошибками
+-- Исправлены задачи №№ 4, 5, 6, 9
 
 -- 1.количество исполнителей в каждом жанре;
 SELECT name, count(*)
@@ -21,19 +23,23 @@ FROM album JOIN track
     ON album.id = track.album_id
 GROUP BY title;
 
+-- Исправлено --------------------------------------------------------------
 -- 4.все исполнители, которые не выпустили альбомы в 2020 году;
 -- никто не выпустил или я не добавил
-SELECT performer.name -- , count(album.title)
-    FROM performer JOIN performer_album
-        ON performer.id = performer_id 
-        JOIN album 
-        ON album.id = album_id
-    WHERE year <> 2020
-GROUP BY performer.name;
+SELECT performer.name
+FROM performer
+WHERE performer.name NOT IN (SELECT DISTINCT performer.name
+                            FROM performer JOIN performer_album
+                            ON performer.id = performer_id 
+                            JOIN album 
+                            ON album.id = album_id
+                            WHERE album.year = 2020)
+ORDER BY performer.name;
             
-            
+
+-- Исправлено --------------------------------------------------------------
 -- 5.названия сборников, в которых присутствует конкретный исполнитель (выберите сами);
-SELECT compilation.title
+SELECT DISTINCT compilation.title
 FROM compilation 
     JOIN compilation_track
     ON compilation.id = compilation_track.compilation_id
@@ -45,13 +51,12 @@ FROM compilation
     ON album.id = performer_album.album_id
     JOIN performer
     ON performer.id = performer_album.performer_id
-    WHERE performer.name LIKE '%Archspire%'
-GROUP BY compilation.title;
+WHERE performer.name LIKE '%Archspire%';
 
+-- Исправлено --------------------------------------------------------------
 -- 6.название альбомов, в которых присутствуют исполнители более 1 жанра;
-SELECT c_g.title, c_g.count_genre FROM 
-    (SELECT album.title, count(genre.name) AS count_genre
-    FROM album JOIN performer_album
+SELECT album.title, count(genre.name)
+FROM album JOIN performer_album
         ON album.id = performer_album.album_id
         JOIN performer
         ON performer.id = performer_album.performer_id
@@ -59,8 +64,8 @@ SELECT c_g.title, c_g.count_genre FROM
         ON performer.id = performer_genre.performer_id
         JOIN genre
         ON genre.id = performer_genre.genre_id
-    GROUP BY album.title) AS c_g
-WHERE count_genre > 1
+GROUP BY album.title
+HAVING count(genre.name) > 1
 LIMIT 6;
 
 -- 7.наименование треков, которые не входят в сборники;
@@ -82,10 +87,15 @@ ON track.album_id = album.id
 WHERE track.duration = (SELECT min(track.duration) FROM track);
 
 
+-- Исправлено --------------------------------------------------------------
 -- 9.название альбомов, содержащих наименьшее количество треков.
-SELECT album.title, count(track.name) AS count_tracks
+SELECT album.title, count(track.name)
 FROM album JOIN track 
-ON album.id = track.album_id
+        ON album.id = track.album_id
 GROUP BY album.title
-ORDER BY count_tracks
-LIMIT 9;
+HAVING count(track.name) = (SELECT count(track.name)
+                            FROM album JOIN track
+                                    ON album.id = track.album_id
+                            GROUP BY album.title
+                            ORDER BY count(track.name)
+                            LIMIT 1);
